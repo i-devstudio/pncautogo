@@ -480,7 +480,7 @@ function renderTable(data) {
    * ============================================================
    */
   
-   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRhZPdHvFf8tkEX3Q7NLh4GHI0X1miGrkm9g91OWaugDzypD4BXU6nUBMH2LDRbvDQdQ/exec";
+   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNDjVbVBWDDGtBwL0kZxaDhXl90f2JRJUWIzYgZFS6QKIRG3wjcJ46u6WpsWSQiV0E/exec";
 
    // ฟังก์ชันส่งฟอร์มจอง
    document.getElementById('bookingForm').addEventListener('submit', function(e) {
@@ -490,19 +490,26 @@ function renderTable(data) {
 	   btn.innerHTML = "⌛ กำลังบันทึก...";
    
 	   const formData = {
-		   phone: document.getElementById('phone').value,
-		   customerName: document.getElementById('customerName').value,
-		   address: document.getElementById('address').value,
-		   note: document.getElementById('note')?.value || '', 
-		   package: document.getElementById('package').options[document.getElementById('package').selectedIndex].text,
-		   netTotal: document.getElementById('netTotal').innerText,
-		   bookDate: document.getElementById('bookDate').value,
-		   bookTime: document.getElementById('bookTime').value,
-		   provinceId: document.getElementById('province').value,
-		   amphureId: document.getElementById('amphure').value,
-		   tambonId: document.getElementById('tambon').value,
-		   zipcode: document.getElementById('zipcode').value
-	   };
+		phone: document.getElementById('phone').value,
+		customerName: document.getElementById('customerName').value,
+		address: document.getElementById('address').value,
+		note: document.getElementById('note')?.value || '', 
+		package: document.getElementById('package').options[document.getElementById('package').selectedIndex].text,
+		netTotal: document.getElementById('netTotal').innerText,
+		bookDate: document.getElementById('bookDate').value,
+		bookTime: document.getElementById('bookTime').value,
+		
+		// --- จุดที่ต้องแก้: เปลี่ยนจาก .value เป็นดึงชื่อข้อความ ---
+		province: document.getElementById('province').options[document.getElementById('province').selectedIndex].text,
+		amphure: document.getElementById('amphure').options[document.getElementById('amphure').selectedIndex].text,
+		tambon: document.getElementById('tambon').options[document.getElementById('tambon').selectedIndex].text,
+		
+		// เก็บ ID ไว้ด้วยเผื่อต้องใช้ค้นหาประวัติ (ชื่อฟิลด์ต้องตรงกับที่ส่งไป GAS)
+		provinceId: document.getElementById('province').value,
+		amphureId: document.getElementById('amphure').value,
+		tambonId: document.getElementById('tambon').value,
+		zipcode: document.getElementById('zipcode').value
+	};
    
 	   fetch(WEB_APP_URL, {
 		   method: 'POST',
