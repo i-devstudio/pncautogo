@@ -317,18 +317,20 @@ historyBox.id = 'addressHistory';
 historyBox.className = 'hidden mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-sm';
 phoneInput.parentNode.appendChild(historyBox);
 
-phoneInput.addEventListener('input', function() {
+phoneInput.addEventListener('input', async function() {
     let phone = this.value;
     if (phone.length === 10) {
-        // ส่งเบอร์ไปเช็คในฐานข้อมูล (Google Sheets)
-        google.script.run
-            .withSuccessHandler(showCustomerHistory)
-            .getCustomerData(phone);
+        try {
+            const response = await fetch(`${WEB_APP_URL}?action=getCustomer&phone=${phone}`);
+            const history = await response.json();
+            showCustomerHistory(history);
+        } catch (err) {
+            console.error("ไม่พบข้อมูลประวัติ:", err);
+        }
     } else {
         historyBox.classList.add('hidden');
     }
 });
-
 function showCustomerHistory(history) {
     if (!history || history.length === 0) return;
 
@@ -377,11 +379,15 @@ function fillOldAddress(encodedData) {
    */
   
   // ฟังก์ชันดึงข้อมูลใหม่จาก Server (Google Apps Script)
-  function refreshDashboard() {
-	google.script.run
-	  .withSuccessHandler(renderTable)
-	  .getDashboardData();
-  }
+  async function refreshDashboard() {
+    try {
+        const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
+        const data = await response.json();
+        renderTable(data);
+    } catch (err) {
+        console.error("ไม่สามารถดึงข้อมูล Dashboard ได้:", err);
+    }
+}
   
   // ฟังก์ชันสร้าง HTML เพื่อแสดงข้อมูลในตารางและมือถือ
   // --- แก้ไขฟังก์ชัน renderTable ใน Section 3 ---
@@ -451,12 +457,22 @@ function renderTable(data) {
   }
   
   // ฟังก์ชันส่งการอัปเดตสถานะไปที่ Server
-  function changeStatus(id, newStatus) {
-	google.script.run.withSuccessHandler(() => {
-	  showToast("อัปเดตสถานะสำเร็จ");
-	  refreshDashboard();
-	}).updateBookingStatus(id, newStatus);
-  }
+  async function changeStatus(id, newStatus) {
+    try {
+        // ส่งแบบ GET พร้อม action updateStatus
+        const url = `${WEB_APP_URL}?action=updateStatus&id=${id}&status=${newStatus}`;
+        
+        // หมายเหตุ: การอัปเดตสถานะ ถ้าใช้ POST จะติด CORS ง่ายกว่า 
+        // ดังนั้นผมแนะนำให้ใช้ fetch แบบ GET หรือเปลี่ยนใน Backend ให้รองรับครับ
+        await fetch(url, { mode: 'no-cors' }); 
+        
+        showToast("อัปเดตสถานะสำเร็จ");
+        // หน่วงเวลาเล็กน้อยให้ Google บันทึกเสร็จก่อนดึงใหม่
+        setTimeout(refreshDashboard, 1000); 
+    } catch (err) {
+        console.error("ไม่สามารถอัปเดตสถานะได้:", err);
+    }
+}
   
   /**
    * ============================================================
@@ -464,7 +480,7 @@ function renderTable(data) {
    * ============================================================
    */
   
-   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyuDMjj8SXAv_tOafl9lPLhm575oqWgVHrDdrUW1wRCoIbmmo6SUqBQV-rX-23WMhnqMw/exec";
+   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRhZPdHvFf8tkEX3Q7NLh4GHI0X1miGrkm9g91OWaugDzypD4BXU6nUBMH2LDRbvDQdQ/exec";
 
    // ฟังก์ชันส่งฟอร์มจอง
    document.getElementById('bookingForm').addEventListener('submit', function(e) {
