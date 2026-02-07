@@ -464,7 +464,7 @@ function renderTable(data) {
    * ============================================================
    */
   
-   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRhZPdHvFf8tkEX3Q7NLh4GHI0X1miGrkm9g91OWaugDzypD4BXU6nUBMH2LDRbvDQdQ/exec";
+   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyuDMjj8SXAv_tOafl9lPLhm575oqWgVHrDdrUW1wRCoIbmmo6SUqBQV-rX-23WMhnqMw/exec";
 
    // ฟังก์ชันส่งฟอร์มจอง
    document.getElementById('bookingForm').addEventListener('submit', function(e) {
