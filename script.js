@@ -464,59 +464,46 @@ function renderTable(data) {
    * ============================================================
    */
   
+   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwRhZPdHvFf8tkEX3Q7NLh4GHI0X1miGrkm9g91OWaugDzypD4BXU6nUBMH2LDRbvDQdQ/exec";
+
+   // ฟังก์ชันส่งฟอร์มจอง
    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    console.log("1. เริ่มส่งฟอร์ม");
-
-    try {
-        const formData = {
-            phone: document.getElementById('phone').value,
-            customerName: document.getElementById('customerName').value,
-            address: document.getElementById('address').value,
-            note: document.getElementById('note') ? document.getElementById('note').value : '', 
-            package: document.getElementById('package').options[document.getElementById('package').selectedIndex].text,
-            netTotal: document.getElementById('netTotal').innerText,
-            bookDate: document.getElementById('bookDate').value,
-            bookTime: document.getElementById('bookTime').value,
-            provinceId: document.getElementById('province').value,
-            amphureId: document.getElementById('amphure').value,
-            tambonId: document.getElementById('tambon').value,
-            zipcode: document.getElementById('zipcode').value
-        };
-        console.log("2. รวมข้อมูลสำเร็จ:", formData);
-
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML = "<span>⌛ กำลังบันทึก...</span>";
-
-        google.script.run
-          .withSuccessHandler((res) => {
-            console.log("4. Server ตอบกลับมาว่า:", res);
-            if (res.success) {
-              showToast("บันทึกคิวสำเร็จ!");
-              toggleModal(false);
-              this.reset();
-              refreshDashboard();
-            } else {
-              alert("Server Error: " + res.message);
-            }
-            btn.disabled = false;
-            btn.innerHTML = "ยืนยันการจองคิว";
-          })
-          .withFailureHandler((err) => {
-            console.error("5. เรียก Server ไม่สำเร็จ:", err);
-            alert("วิกฤต! ติดต่อ Server ไม่ได้: " + err);
-            btn.disabled = false;
-            btn.innerHTML = "ยืนยันการจองคิว";
-          })
-          .saveBooking(formData);
-          
-        console.log("3. กำลังส่งไปที่ Server...");
-    } catch (err) {
-        console.error("เกิดข้อผิดพลาดใน JS:", err);
-        alert("JS Error: " + err.message);
-    }
-});
+	   e.preventDefault();
+	   const btn = document.getElementById('submitBtn');
+	   btn.disabled = true;
+	   btn.innerHTML = "⌛ กำลังบันทึก...";
+   
+	   const formData = {
+		   phone: document.getElementById('phone').value,
+		   customerName: document.getElementById('customerName').value,
+		   address: document.getElementById('address').value,
+		   note: document.getElementById('note')?.value || '', 
+		   package: document.getElementById('package').options[document.getElementById('package').selectedIndex].text,
+		   netTotal: document.getElementById('netTotal').innerText,
+		   bookDate: document.getElementById('bookDate').value,
+		   bookTime: document.getElementById('bookTime').value,
+		   provinceId: document.getElementById('province').value,
+		   amphureId: document.getElementById('amphure').value,
+		   tambonId: document.getElementById('tambon').value,
+		   zipcode: document.getElementById('zipcode').value
+	   };
+   
+	   fetch(WEB_APP_URL, {
+		   method: 'POST',
+		   mode: 'no-cors', // สำคัญมากสำหรับความง่าย
+		   body: JSON.stringify(formData)
+	   })
+	   .then(() => {
+		   alert("บันทึกคิวสำเร็จ!");
+		   this.reset();
+		   if (typeof refreshDashboard === 'function') refreshDashboard();
+	   })
+	   .catch(err => alert("เกิดข้อผิดพลาด: " + err))
+	   .finally(() => {
+		   btn.disabled = false;
+		   btn.innerHTML = "ยืนยันการจองคิว";
+	   });
+   });
   
   /**
    * ============================================================
