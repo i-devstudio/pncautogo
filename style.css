@@ -1,0 +1,11 @@
+body { font-family: 'Kanit', sans-serif; background-color: #f8f9fa; }
+.bg-brand { background-color: #1f7045; }
+.text-brand { color: #1f7045; }
+.border-brand { border-color: #1f7045; }
+.status-badge { @apply px-3 py-1 rounded-full text-xs font-medium; }
+input:disabled, select:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+
+/* Custom Scrollbar สำหรับ Modal */
+.modal-scroll::-webkit-scrollbar { width: 6px; }
+.modal-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+.modal-scroll::-webkit-scrollbar-thumb { background: #1f7045; border-radius: 10px; }

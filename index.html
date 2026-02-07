@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PNC Auto Go</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <nav class="bg-black text-white p-4 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="font-bold text-xl flex items-center">
+                <span class="bg-brand p-1 rounded mr-2 text-white">PNC</span> Admin
+            </h1>
+            <div class="flex items-center gap-4">
+                <span class="text-sm hidden md:inline opacity-80">ผู้ใช้งาน: ปณขัย</span>
+                <button onclick="toggleModal(true)" class="bg-brand hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                    + จองคิวใหม่
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6">
+        
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">วันที่รับงาน</label>
+                    <input type="date" id="filterDate" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand">
+                </div>
+				<div>
+					<label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">ค้นหาเบอร์โทร</label>
+					<input type="text" 
+						   id="searchPhone" 
+						   placeholder="08xxxxxxxx" 
+						   inputmode="numeric" 
+						   maxlength="10" 
+						   pattern="\d{10}"
+						   class="w-full border rounded-lg px-3 py-2 outline-none focus:border-brand transition-all">
+				</div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">สถานะงาน</label>
+                    <div class="flex flex-wrap gap-2" id="statusFilterGroup">
+                        <button class="px-3 py-2 bg-brand text-white rounded-lg text-sm font-medium">ทั้งหมด (10)</button>
+                        <button class="px-3 py-2 bg-gray-100 hover:bg-yellow-100 rounded-lg text-sm transition font-medium">รอล้าง (3)</button>
+                        <button class="px-3 py-2 bg-gray-100 hover:bg-blue-100 rounded-lg text-sm transition font-medium">กำลังล้าง (2)</button>
+                        <button class="px-3 py-2 bg-gray-100 hover:bg-green-100 rounded-lg text-sm transition font-medium">เสร็จสิ้น (5)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto hidden md:block">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="p-4 font-semibold text-sm">ลูกค้า</th>
+                            <th class="p-4 font-semibold text-sm text-center">พื้นที่</th>
+                            <th class="p-4 font-semibold text-sm text-center">ราคา</th>
+                            <th class="p-4 font-semibold text-sm text-center">สถานะ</th>
+                            <th class="p-4 font-semibold text-sm text-right">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueTableBody" class="divide-y">
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4">
+                                <div class="font-bold">คุณอาทิตย์ เรียนดี</div>
+                                <div class="text-xs text-gray-500">081-234-5678</div>
+                            </td>
+                            <td class="p-4 text-sm text-center">กรุงเทพ / ปทุมวัน</td>
+                            <td class="p-4 text-center font-bold text-brand">฿1,200</td>
+                            <td class="p-4 text-center">
+                                <select onchange="updateStatusEffect(this)" class="text-xs font-bold p-2 rounded-lg bg-yellow-100 text-yellow-700 outline-none border-none">
+                                    <option value="pending" selected>🟡 รอล้าง</option>
+                                    <option value="processing">🔵 กำลังล้าง</option>
+                                    <option value="completed">🟢 เสร็จสิ้น</option>
+                                </select>
+                            </td>
+                            <td class="p-4 text-right space-x-2">
+                                <button class="text-blue-600 font-medium text-sm hover:underline">Maps</button>
+                                <button class="text-gray-400 font-medium text-sm hover:text-black">แก้ไข</button>
+                                <button onclick="confirmDelete()" class="text-red-400 font-medium text-sm hover:text-red-600">ยกเลิก</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+			
+
+            <div id="mobileView" class="md:hidden p-4 space-y-4">
+                <div class="bg-white border rounded-lg p-4 shadow-sm border-l-4 border-brand">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-bold">คุณอาทิตย์ เรียนดี</div>
+                            <div class="text-xs text-gray-500 font-bold text-brand">฿1,200</div>
+                        </div>
+                        <span class="status-badge bg-yellow-100 text-yellow-700">รอล้าง</span>
+                    </div>
+                    <div class="text-xs text-gray-600 mb-3 underline italic">📍 กรุงเทพ / ปทุมวัน / วังใหม่</div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-gray-100 text-xs py-2 rounded font-bold">MAPS</button>
+                        <button class="flex-1 bg-gray-100 text-xs py-2 rounded font-bold">แก้ไข</button>
+                        <button onclick="confirmDelete()" class="flex-1 bg-red-50 text-red-500 text-xs py-2 rounded font-bold">ยกเลิก</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-gray-500">แสดง 1 ถึง 10 จาก 10 รายการ</div>
+                <div class="flex items-center gap-1">
+                    <button class="px-3 py-1 border rounded hover:bg-gray-200">ก่อนหน้า</button>
+                    <button class="px-3 py-1 bg-brand text-white rounded">1</button>
+                    <button class="px-3 py-1 border rounded hover:bg-gray-200">ถัดไป</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="bookingModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+		<div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleModal(false)"></div>
+
+        
+        <div class="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="bg-[#1f7045] p-5 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold">สร้างรายการจองคิวใหม่</h2>
+                <button onclick="toggleModal(false)" class="text-3xl line-height-0 hover:text-gray-200">&times;</button>
+            </div>
+
+            <form id="bookingForm" class="p-6 space-y-5 max-h-[85vh] overflow-y-auto modal-scroll">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">เบอร์โทรศัพท์ (10 หลัก) <span class="text-red-500">*</span></label>
+                        <input type="text" id="phone" maxlength="10" required 
+                            class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-[#1f7045] outline-none" 
+                            placeholder="08XXXXXXXX">
+                        <div id="loadingSearch" class="hidden absolute right-3 top-9 text-[10px] text-green-600 animate-spin">⌛</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อลูกค้า <span class="text-red-500">*</span></label>
+                        <input type="text" id="customerName" maxlength="20" required 
+                            class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-[#1f7045] outline-none">
+                    </div>
+                </div>
+				<div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">วันที่จอง</label>
+                        <input type="date" id="bookDate" required class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">เวลา</label>
+                        <input type="time" id="bookTime" required class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label class="block text-sm font-bold text-[#1f7045]">ที่อยู่จัดส่งบริการ</label>
+                    <textarea id="address" maxlength="255" rows="2" 
+                        class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-[#1f7045] outline-none" 
+                        placeholder="เลขที่บ้าน, หมู่บ้าน, ซอย, ถนน..."></textarea>
+						<div class="mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+							<label class="block text-xs font-bold text-yellow-700 mb-1">🔍 ค้นหาที่อยู่ด่วน (พิมพ์ ตำบล, อำเภอ, จังหวัด หรือ รหัสไปรษณีย์)</label>
+							<input type="text" id="addressSearch" placeholder="เช่น 12150 หรือ บึงคำพร้อย" 
+								   class="w-full border-2 border-yellow-400 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 outline-none">
+							
+							<div id="searchResult" class="hidden mt-2 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+								</div>
+						</div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <select id="province" class="border border-gray-300 rounded-lg p-2 text-xs outline-none">
+                            <option value="">จังหวัด</option>
+                            <option value="Bangkok">กรุงเทพฯ</option>
+                        </select>
+                        <select id="amphure" disabled class="border border-gray-300 rounded-lg p-2 text-xs outline-none">
+                            <option value="">อำเภอ/เขต</option>
+                        </select>
+                        <select id="tambon" disabled class="border border-gray-300 rounded-lg p-2 text-xs outline-none">
+                            <option value="">ตำบล/แขวง</option>
+                        </select>
+                        <input type="text" id="zipcode" readonly placeholder="รหัสไปรษณีย์" 
+                            class="bg-gray-100 border border-gray-300 rounded-lg p-2 text-xs text-center font-bold">
+                    </div>
+                    
+                    <input type="url" id="mapsLink" class="w-full border border-gray-300 rounded-lg p-2 text-xs text-blue-600 underline" 
+                        placeholder="Link Google Maps">
+						<div class="mt-3">
+							<label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">หมายเหตุ (ถ้ามี)</label>
+							<textarea id="note" rows="2" placeholder="เช่น บ้านสีขาวหลังมุม, ฝากกุญแจไว้ที่นิติ" 
+									  class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-brand resize-none"></textarea>
+						</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Package</label>
+
+						<select id="package" onchange="calculate()" required class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+							<option value="0">-- เลือกแพ็กเกจ --</option>
+							<option value="300">ล้างทั่วไป (300.-)</option>
+							<option value="500">พรีเมี่ยม (500.-)</option>
+							<option value="200">มอเตอร์ไซค์ (200.-)</option>
+						</select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">ราคาหน้างาน (แก้ไขได้)</label>
+                        <input type="number" id="basePrice" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">ส่วนลด</label>
+                        <div class="flex">
+                            <input type="number" id="discountValue" value="0" class="w-full border border-gray-300 border-r-0 rounded-l-lg p-2 text-sm">
+                            <select id="discountType" class="border border-gray-300 rounded-r-lg bg-gray-50 p-1 text-xs">
+                                <option value="baht">฿</option>
+                                <option value="percent">%</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#1f7045] p-4 rounded-xl text-white flex justify-between items-center shadow-inner">
+                    <span class="font-medium text-sm">ยอดรวมสุทธิ:</span>
+                    <span class="text-2xl font-black">฿ <span id="netTotal">0.00</span></span>
+                </div>
+
+               
+
+                <div id="conflictWarning" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg font-bold flex items-center">
+                    ⚠️ ช่วงเวลานี้มีคิวจองแล้ว ไม่สามารถบันทึกได้
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-opacity-80 transition disabled:bg-gray-300">
+                    ยืนยันการจองคิว
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
